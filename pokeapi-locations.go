@@ -4,8 +4,12 @@ import (
 	"encoding/json"
 	"io"
 	"net/http"
+	"time"
+
+	"github.com/Couches/pokecache"
 )
 
+var mapCache pokecache.Cache
 var nextLocationsURL string = "https://pokeapi.co/api/v2/location-area/"
 var prevLocationsURL string
 
