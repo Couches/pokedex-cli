@@ -1,7 +1,6 @@
 package pokecache
 
 import (
-	"fmt"
 	"time"
 )
 
@@ -20,6 +19,8 @@ func NewCache(interval time.Duration) Cache {
     contents: map[string]cacheEntry{},
     interval: interval,
   }
+
+  go cache.reapLoop()
 
   return cache
 }
@@ -52,7 +53,6 @@ func (c Cache) reapLoop() {
 func (c Cache) cullExpired() {
   for key, value := range c.contents {
     if float64(time.Now().Second()) > float64(value.createdAt.Second()) + c.interval.Seconds() {
-      fmt.Println("Deleted")
       delete(c.contents, key)
     }
   }

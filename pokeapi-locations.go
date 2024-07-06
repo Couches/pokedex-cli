@@ -9,49 +9,55 @@ import (
 	"github.com/Couches/pokecache"
 )
 
-var mapCache pokecache.Cache
+var mapCache pokecache.Cache = pokecache.NewCache(5 * time.Second)
 var nextLocationsURL string = "https://pokeapi.co/api/v2/location-area/"
 var prevLocationsURL string
 
 func fetchLocations(url string) (error, LocationsResponse) {
-  req, err := http.NewRequest("GET", url, nil)
+	locationsResponse := LocationsResponse{}
 
-  locationsResponse := LocationsResponse{}
+	body, ok := mapCache.Get(url)
   
-  if err != nil {
-    return err, locationsResponse
-  }
+	if !ok {
+		req, err := http.NewRequest("GET", url, nil)
 
-  res, err := http.DefaultClient.Do(req)
+		if err != nil {
+			return err, locationsResponse
+		}
 
-  if err != nil {
-    return err, locationsResponse
-  }
+		res, err := http.DefaultClient.Do(req)
 
-  defer res.Body.Close()
+		if err != nil {
+			return err, locationsResponse
+		}
 
-  body, err := io.ReadAll(res.Body)  
+		defer res.Body.Close()
 
-  if err != nil {
-    return err, locationsResponse
-  }
+		body, err = io.ReadAll(res.Body)
 
-  err = json.Unmarshal(body, &locationsResponse)
+		if err != nil {
+			return err, locationsResponse
+		}
 
-  if err != nil {
-    return err, locationsResponse
-  }
+    mapCache.Add(url, body)
+	}
 
-  nextLocationsURL = locationsResponse.Next
-  prevLocationsURL = locationsResponse.Previous
+  err := json.Unmarshal(body, &locationsResponse)
 
-  return nil, locationsResponse
+	if err != nil {
+		return err, locationsResponse
+	}
+
+	nextLocationsURL = locationsResponse.Next
+	prevLocationsURL = locationsResponse.Previous
+
+	return nil, locationsResponse
 }
 
 func fetchNextLocations() (error, LocationsResponse) {
-  return fetchLocations(nextLocationsURL)
+	return fetchLocations(nextLocationsURL)
 }
 
 func fetchPreviousLocations() (error, LocationsResponse) {
-  return fetchLocations(prevLocationsURL)
+	return fetchLocations(prevLocationsURL)
 }
