@@ -6,6 +6,9 @@ import "os"
 import "strings"
 
 func main() {
+  playerData := playerData{
+    pokedex: make(map[string]Pokemon),
+  }
 	reader := bufio.NewReader(os.Stdin)
 
 	for {
@@ -20,19 +23,23 @@ func main() {
 		args := strings.Fields(cleanInput(input))
 
 		if cmd, exists := getCommands()[args[0]]; exists {
-			cmd.callback(args[1:])
+			cmd.callback(args[1:], playerData)
 			fmt.Print("\n")
 		} else {
-      fmt.Println("I don't think that command exists.")
-      commandHelp(args[1:])
-    }
+			fmt.Println("I don't think that command exists.")
+			commandHelp(args[1:], playerData)
+		}
 	}
+}
+
+type playerData struct {
+	pokedex map[string]Pokemon
 }
 
 type cliCommand struct {
 	name        string
 	description string
-	callback    func([]string) error
+	callback    func([]string, playerData) error
 }
 
 func getCommands() map[string]cliCommand {
@@ -62,11 +69,21 @@ func getCommands() map[string]cliCommand {
 			description: "Lists all pokemon that may be found in an area",
 			callback:    commandExplore,
 		},
-    "catch": {
-      name: "catch <Pokemon>",
-      description: "Throws a ball at the Pokemon",
-      callback: commandCatch,
-    },
+		"catch": {
+			name:        "catch <Pokemon>",
+			description: "Throws a ball at the Pokemon",
+			callback:    commandCatch,
+		},
+		"inspect": {
+			name:        "inspect <Pokemon>",
+			description: "Inspects a Pokemon in your Pokedex",
+			callback:    commandInspect,
+		},
+		"pokedex": {
+			name:        "pokedex",
+			description: "Lists out all Pokemon you've captured",
+			callback:    commandPokedex,
+		},
 	}
 }
 

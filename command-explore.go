@@ -2,7 +2,11 @@ package main
 
 import "fmt"
 
-func commandExplore(args []string) error {
+func commandExplore(args []string, _ playerData) error {
+  if len(args) == 0 {
+    fmt.Println("Missing area to explore!\nUsage: explore <Area>")
+    return nil
+  }
   location := args[0]
   fmt.Printf("Exploring %s...\n", location)
 

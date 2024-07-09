@@ -12,8 +12,8 @@ import (
 
 var pokemonCache pokecache.Cache = pokecache.NewCache(60 * time.Second)
 
-func fetchPokemon(pokemonName string) (error, PokemonResponse) {
-  pokemonResponse := PokemonResponse{}
+func fetchPokemon(pokemonName string) (error, Pokemon) {
+  pokemonResponse := Pokemon{}
 
   body, ok := pokemonCache.Get(pokemonName)
 
@@ -38,8 +38,6 @@ func fetchPokemon(pokemonName string) (error, PokemonResponse) {
     if err != nil {
       return err, pokemonResponse
     }
-
-    pokemonCache.Add(pokemonName, body)
   }
 
   err := json.Unmarshal(body, &pokemonResponse)
@@ -47,6 +45,8 @@ func fetchPokemon(pokemonName string) (error, PokemonResponse) {
   if err != nil {
     return err, pokemonResponse
   }
+
+  pokemonCache.Add(pokemonName, body)
 
   return nil, pokemonResponse
 }

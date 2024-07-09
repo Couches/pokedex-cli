@@ -2,7 +2,7 @@ package main
 
 import "fmt"
 
-func commandMapf(_ []string) error {
+func commandMapf(_ []string, _ playerData) error {
   _, locationsResponse := fetchNextLocations()
   locations := locationsResponse.Results
   for _, location := range locations {
